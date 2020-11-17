@@ -1,0 +1,26 @@
+###Generation de bits aléatoires
+data = randi([0 1],70,1);
+
+##condage convolutif
+trellis = poly2trellis(5, [37 33], 37) 
+codedData = convenc(data,trellis);
+
+##RS ENCODER
+#Parameters
+k=:Longueur du message
+m: nombre de bits par symboles
+n= 2(exp m) -1: longueur du mot de code
+prim_poly = 285; représentation des coefficients du polynôme
+primtif dans sa forme décimal
+b = 0; exposant de α, b.
+#CODAGE RS
+msg=gf([1 2 3 4 5 6 7 8 9 10 11],m);
+
+genpoly = rsgenpoly(n,k,prim_poly,b) %definit le polynôme générateur g(x) du code
+mot_code = rsenc(msg,n,k,GENPOLY)
+
+## entrelacement binaire
+
+##QPSK MOD
+M=4; ordre de modulation
+txsig= pskmod(data,M,pi/M) Modulation des symboles (pi/4 phase initiale)
