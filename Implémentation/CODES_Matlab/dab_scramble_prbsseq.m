@@ -4,7 +4,7 @@ function prbs_seq = dab_scramble_prbsseq( K_RS )
 
 %Initialize variables
 
-K_RS=10;
+K_RS=36; % length of data input
 srBin= [1 1 1 1 1 1 1 1 1]; %shift register content
 prbsBin = zeros (1, K_RS); %initialize output
 

@@ -40,10 +40,10 @@ title('Constellation emise')
 
 %Insertion des symboles pilotes
 
-dataPilote= randi ([0,1],1,nbitsPilotes); %generation du train binaire des pilotes
-symPilote= bi2de (reshape(dataPilote,M_IFFT*nbPilotes,n),'left-msb'); %conversion S/P et converion binaire en decimal
-modPilote= pskmod(symPilote,M,init_phase).* mod_norm; % modulation QPSK des pilotes
-modPilote= reshape(modPilote,4,2); %conversion S/P 
+dataPilote = randi ([0,1],1,nbitsPilotes); %generation du train binaire des pilotes
+symPilote = bi2de (reshape(dataPilote,M_IFFT*nbPilotes,n),'left-msb'); %conversion S/P et converion binaire en decimal
+modPilote = pskmod(symPilote,M,init_phase).* mod_norm; % modulation QPSK des pilotes
+modPilote = reshape(modPilote,4,2); %conversion S/P 
  
 dataEnd= [modPilote modData]; %concatenation pilotes+data
  
@@ -53,8 +53,16 @@ dataEnd= [modPilote modData]; %concatenation pilotes+data
  %%%% Insertion du préfice cyclique
     Ajout_CP = [ IFFT_function; IFFT_function(1:cp,:)];
  
-  
+%-------------------------------------------------------------------------------------------------------------  
+
+% DEMODULATION
+
+%Suppresion prefixe cyclique
+
+Suppr_CP = Ajout_CP(1:4,:);
+
+%-----FFT-----
+ FFT_function= fft(Suppr_CP ,M_IFFT); % discrete Fourier transform 
 
  
-
- 
+%estimation et egalisation

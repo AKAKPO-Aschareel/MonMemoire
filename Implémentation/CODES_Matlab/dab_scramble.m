@@ -1,16 +1,20 @@
-function DataOut = dab_scramble (K_RS ,DataIn)
+function DataOut = dab_scramble (DataIn)
  
 %Procédure
 %-----------------------------------------------
 
 %Initialize variables 
 
- 
-DataIn=[1 0 1 0 1 1 0 1 0 1];
-K_RS = length(DataIn);
+%K_RS=36; % binary sequence length 
+%DataIn= randi([0,1],1,K_RS); % Generates binary sequence of message
+
+
+
+DataIn = coding_source(); %data input 
+K_RS= length (DataIn);
 dataAux=DataIn;
 
-  dataAux = bi2de(dataAux(:),'left-msb'); % convert to bytes 
+dataAux = bi2de(dataAux(:),'left-msb'); % convert to bytes 
   
   %Get SCRAMBLING
    prbs_seq = dab_scramble_prbsseq( K_RS );

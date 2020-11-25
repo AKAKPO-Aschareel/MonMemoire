@@ -1,21 +1,22 @@
 
-%ENTRELACEMENT-DESENTRELACEMENT%
+%ENTRELACEMENT
 %-------------------------------------------------------------
-function [intrlvd, desintrlvd ] = time_interleaving(codedData)
+function intrlvd = time_interleaving(codedData)
 
-data= [1 0]; %Code convolutional input
+%Initialize variables
+DataIn = coding_source(); %input data of transmission
 
-codedData = convolutionalDAB(data); % donnees en sortie du codeur convolutionnel à entrelacer
+data = dab_scramble (DataIn); % input data of convolutional encoder 
+
+codedData = convolutionalDAB(data); %données à entrelacer
+ t= 24; %depth of interleaving
+ n= 6; % words length
  
 %Get time interleaving
 %-----------------------------------------------
-codedData= reshape (codedData,2,4)';
+codedData= reshape (codedData,n,t)';
 intrlvd=codedData(:)'; 
 
-%Get time desinterleaving
-%-----------------------------------------------
-desintrlvd= reshape(intrlvd,4,2)' ;
-desintrlvd = desintrlvd(:)';
 
 end
 

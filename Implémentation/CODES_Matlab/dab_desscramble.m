@@ -3,11 +3,11 @@ function [DataIN] = dab_desscramble(rxscramble)
 %Initialize variables 
 
  
-DataIn=[1 0 1 0 1 1 0 1 0 1];
-K_RS = length(DataIn);
 
-DataOut = dab_scramble (K_RS ,DataIn);
-rxscramble=DataOut;
+
+decodedData  = viterbi();
+rxscramble=decodedData ;
+K_RS = length(rxscramble);
 
 
 rxscramble = bi2de(rxscramble(:),'left-msb'); % convert to bytes 
