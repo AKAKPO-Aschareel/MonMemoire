@@ -10,7 +10,7 @@ function DataOut = dab_scramble (DataIn)
 
 
 
-DataIn = coding_source(); %data input 
+%DataIn = coding_source(); %data input 
 K_RS= length (DataIn);
 dataAux=DataIn;
 

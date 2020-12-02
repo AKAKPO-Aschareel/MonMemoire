@@ -1,13 +1,14 @@
 
-function desintrlvd = des_interleaving()
+function desintrlvd = des_interleaving(dataDemodulate)
 
 %Initialize variables
- t= 24; %depth of interleaving
- n= 6; % words length
+ x= length(dataDemodulate);% Convolutional code word length
+ t=24 ; %depth of interleaving
+ n= x/t; % words length
  
-dataModulate = Modulation(); % données en entree du demodulateur
 
-input = Demodulation(dataModulate);
+
+input = dataDemodulate;
 trellis = poly2trellis(7, [133 171 145 133]); %Define trellis
 
 %Get time desinterleaving

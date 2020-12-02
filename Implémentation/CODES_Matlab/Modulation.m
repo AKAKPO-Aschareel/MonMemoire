@@ -1,35 +1,38 @@
 
-function dataModulate = Modulation()
+function dataModulate = Modulation(msgbits)
+
 %Initialisation des variables
 %----------------------------------------------------------------------------------
-M=4; %nombre de symbole pour une modulation QPSK
-n=2; %nombre de bits par symbole QPSK
-init_phase= pi/4; %phase inital QPSK
+
+%QPSK PARAMETERS
+
+M=4; % number of symbole for modulation QPSK
+n=2; % number of  bits per symbole QPSK
+init_phase= pi/4; % phase inital QPSK
 
 Es= 1; %variable d'estimation
-M_IFFT = 8; %nombre de sous porteuses 
+
+% OFDM PARAMETERS
+
+M_IFFT = 10; %nombre de sous porteuses 
 
 
-dataOfdm= 9; % nombres de paquets OFDM
+dataOfdm=12; % nombres de paquets OFDM
 cp= 1/2 * M_IFFT;  % définition du préfixe cyclique
 nbits= M_IFFT * dataOfdm *n  ; %nombre de bits total à envoyer
 
-nbPilotes= 2; %nombre de paquets  pilotes
-nbitsPilotes = M_IFFT*nbPilotes*n ; %nombre total de bits des pilotes
+%nbPilotes= 2; %nombre de paquets  pilotes
+%nbitsPilotes = M_IFFT*nbPilotes*n ; %nombre total de bits des pilotes
 
-DataIn = coding_source(); %input data of transmission
 
-data = dab_scramble (DataIn); % input data of convolutional encoder 
-
-codedData = convolutionalDAB(data); %données à entrelacer
+ 
 %---------------------------------------------------------------------------------------
  
 %%%%%modulation QPSK 
  
  mod_norm=sqrt(Es/(1./M.*sum(abs(qammod([0:M-1],M)).^2)));% normalisation
  
- msgbits = time_interleaving(codedData); %generation du train binaire d'inforamtion
- 
+
  data_n= bi2de (reshape(msgbits,M_IFFT*dataOfdm,n),'left-msb'); %conversion S/P et converion binaire en decimal/ Formation des symboles
  modData= pskmod(data_n,M,init_phase).* mod_norm; % modulation QPSK de l'information
  modData= reshape(modData,M_IFFT,dataOfdm);  %conversion S/P

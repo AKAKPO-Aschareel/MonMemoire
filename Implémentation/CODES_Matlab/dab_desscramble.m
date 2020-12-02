@@ -1,12 +1,11 @@
-function [DataIN] = dab_desscramble(rxscramble)
+function [DataIN] = dab_desscramble(decodedData)
 
 %Initialize variables 
 
  
 
 
-decodedData  = viterbi();
-rxscramble=decodedData ;
+rxscramble= decodedData ;
 K_RS = length(rxscramble);
 
 

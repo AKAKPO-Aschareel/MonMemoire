@@ -8,15 +8,10 @@ M=4; %nombre de symbole pour une modulation QPSK
 n=2; %nombre de bits par symbole QPSK
 init_phase= pi/4; %phase inital QPSK
 
-M_IFFT = 8; %nombre de sous porteuses 
+M_IFFT = 10; %nombre de sous porteuses 
 Es= 1; %variable d'estimation
-%DataIn = coding_source(); %input data of transmission
 
-%data = dab_scramble (DataIn); % input data of convolutional encoder 
 
-%codedData = convolutionalDAB(data); %données à entrelacer
-%msgbits = time_interleaving(codedData);
-dataModulate = Modulation();
 
 
 
