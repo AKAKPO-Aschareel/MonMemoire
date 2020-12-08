@@ -1,12 +1,18 @@
 function decodedData  = viterbi(desintrlvd)
 
-inputData = desintrlvd;
+ %Viterbi parameters
+ L = 7; % constrainte lenght
+ R= 1/4; %code rate
+ tblen = (2.5*( L-1)) / (1-R ); % positive integer scalar that specifies the traceback depth
 
+ %Define trellis
+ trellis = poly2trellis(7, [133 171 145 133]); 
 
-trellis = poly2trellis(7, [133 171 145 133]); %Define trellis
+ inputData = desintrlvd; %% bits input
+
 
 % Convolutional decoding
-tblen= 2; % positive integer scalar that specifies the traceback depth
+
 decodedData = vitdec(inputData,trellis,tblen,'trunc','hard');
 
 

@@ -4,24 +4,26 @@
 % Description : DAB Implémentation                       
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-clear;
+clear ;
 close all;
 clc;
 
 %% Emission
 
+binary_length = 44;
+numErrs = 0; %errors counter
 
 %Define binary sequence of message audio DAB+
-DataIn = randi ([0,1],1,44); 
+DataIn = randi ([0,1],1,binary_length); 
 
 %Scrambling
-DataOut = dab_scramble (DataIn);
+DataScramble = dab_scramble (DataIn, binary_length);
 
 
 %-----Channel codding-------
 
 %RS encoder
-codedRS = Reed_Solomon_Encoder(DataOut);
+codedRS = Reed_Solomon_Encoder(DataScramble);
  
 
 %Convolutionnal coding
@@ -56,11 +58,23 @@ desintrlvd = des_interleaving(dataDemodulate);
 
 decodedData_inner  = viterbi(desintrlvd);
 
-%RS Decoding
+% RS Decoding
 decoded_RS= Reed_Solomon_Decoder (decodedData_inner);
 
-%Desscrambling
+% Desscrambling
 
-DataIN = dab_desscramble(decoded_RS);
+DataOut = dab_desscramble(decoded_RS);
+
+% Calculate the number of bit errors
+ nErrors = biterr(DataIn,DataOut);
+        
+% Increment the error 
+ numErrs = numErrs + nErrors;
+ 
+ numBits = binary_length;
+    
+    
+% Estimate the BER
+ berEst = numErrs/numBits;
 
 %%END

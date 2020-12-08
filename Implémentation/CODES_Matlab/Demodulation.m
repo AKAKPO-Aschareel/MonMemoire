@@ -4,19 +4,17 @@ function dataDemodulate = Demodulation(dataModulate)
 
 %Initialize variables;
 
+%QPSK PARAMETERS
 M=4; %nombre de symbole pour une modulation QPSK
 n=2; %nombre de bits par symbole QPSK
 init_phase= pi/4; %phase inital QPSK
 
+%
 M_IFFT = 10; %nombre de sous porteuses 
-Es= 1; %variable d'estimation
 
 
 
-
-
-mod_norm=sqrt(Es/(1./M.*sum(abs(qammod([0:M-1],M)).^2)));% normalisation
-
+%%PROCEDURE
 
 %Suppresion prefixe cyclique
 
@@ -30,8 +28,13 @@ Suppr_CP = dataModulate(1:M_IFFT,:);
 %--------------------------------------------
 
 fftOut=FFT_function(:); %conversion P/S
-demodData = pskdemod(fftOut.*(1/mod_norm),M,init_phase); % demodulation QPSK de l'information
-demodData = de2bi(demodData,'left-msb'); %convert data decimal to binary
+
+
+%demodulation QPSK
+demodData = pskdemod(fftOut,M,init_phase); 
+
+%convert data decimal to binary
+demodData = de2bi(demodData,'left-msb'); 
 
 dataDemodulate = demodData(:)';
 end

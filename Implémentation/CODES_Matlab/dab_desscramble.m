@@ -2,17 +2,14 @@ function [DataIN] = dab_desscramble(decodedData)
 
 %Initialize variables 
 
- 
-
-
 rxscramble= decodedData ;
-K_RS = length(rxscramble);
+K= length(rxscramble);
 
 
 rxscramble = bi2de(rxscramble(:),'left-msb'); % convert to bytes 
   
   %Get DESCRAMBLING
-   prbs_seq = dab_scramble_prbsseq( K_RS );
+   prbs_seq = dab_scramble_prbsseq( K );
     prbs_seq = bi2de(prbs_seq(:),'left-msb'); % convert to bytes
     
   
