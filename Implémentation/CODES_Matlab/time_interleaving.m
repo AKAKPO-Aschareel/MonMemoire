@@ -1,19 +1,27 @@
 
+
 %ENTRELACEMENT
-%-------------------------------------------------------------
+
+
+
 function intrlvd = time_interleaving(codedData)
 
-% Initialize variables
 
- x= length(codedData); % data length
+ %Procedure
+ 
  t=24 ; % depth of interleaving
- n= x/t; % words length
+
+ data = codedData; % output of convolutionnal encoder
+ x= length(data); % data length
+  n= x/t; % words length
+  
  
 %Get time interleaving
 %-----------------------------------------------
-intrlvd= reshape (codedData,n,t)';
+intrlvd= reshape (data,n,t)';
 intrlvd=intrlvd(:)'; 
 
+ 
 
 end
 

@@ -1,0 +1,9 @@
+function [Para] =OFDM_Parameters ()
+
+%QPSK PARAMETERS
+Para.M = 4; % number of symbol for  QPSK modulation
+n=2; % number of  bits per symbole QPSK
+init_phase= pi/4; % phase inital QPSK
+
+end
+

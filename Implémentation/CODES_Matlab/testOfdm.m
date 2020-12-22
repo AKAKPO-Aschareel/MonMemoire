@@ -1,4 +1,4 @@
-
+clear;
 clc ;
 close all;
 
@@ -11,17 +11,17 @@ M=4; %nombre de symbole pour une modulation QPSK
 n=2; %nombre de bits par symbole QPSK
 init_phase= pi/4; %phase inital QPSK
 
-Choix =1;
+Choix=1;
 
 %OFDM PARAMETERS
 
-M_IFFT= 4; %nombre de sous porteuses 
+M_IFFT= 1536; %nombre de sous porteuses 
 
-dataOfdm= 3; % nombres de paquets OFDM
+dataOfdm= 75; % nombres de paquets OFDM
 cp= 1/2 * M_IFFT;  % définition du préfixe cyclique
 nbits= M_IFFT * dataOfdm *n  ; %nombre de bits total à envoyer
 sym_Ofdm = dataOfdm * M_IFFT; %nombre de symboles OFDM à envoyer
-nbPilotes = 2; %nombre de paquets  pilotes
+nbPilotes = 25; %nombre de paquets  pilotes
 nbitsPilotes = M_IFFT*nbPilotes*n ; %nombre total de bits des pilotes
 %---------------------------------------------------------------------------------------
  
@@ -57,12 +57,12 @@ dataEnd= [modPilote_redim modData_redim]; %concatenation pilotes+data
  %%%% Insertion du préfice cyclique
     Ajout_CP = [ IFFT_function; IFFT_function(1:cp,:)];
   
-     txsig = Ajout_CP ;
+     txSig = Ajout_CP ;
 %-------------------------------------------------------------------------------------------------------------  
 
 %Passage dans le canal par paquet%%%
 %for k = 1:dataOfdm+nbPilotes
- rxSig = awgn(txsig ,20,'measured');
+ %rxSig = awgn(txsig ,20,'measured');
 %end
 %--------------------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ dataEnd= [modPilote_redim modData_redim]; %concatenation pilotes+data
 
 %Suppresion prefixe cyclique
 
-Suppr_CP = rxSig(1:M_IFFT,:);
+Suppr_CP = txSig(1:M_IFFT,:);
 
 %-----FFT-----
  FFT_function = fft(Suppr_CP ,M_IFFT); % discrete Fourier transform 
@@ -102,7 +102,13 @@ data_recup(:,1:dataOfdm) = FFT_function (:, nbPilotes+1:end);
       sym_recu = data_recup; %pas d'egalisation
   end
 
-  
+  % Affichage constellation recu
+
+figure(2);
+hold on;
+plot(real(sym_recu ),imag(sym_recu),'*');
+title('Constellation recu')
+
 
 
 %demodulation QPSK

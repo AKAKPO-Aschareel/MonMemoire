@@ -1,41 +1,82 @@
 
-
-function dataDemodulate = Demodulation(dataModulate)
+function dataDemod_OFDM = Demodulation(OFDM_Parameters,dataModulate)
 
 %Initialize variables;
 
-%QPSK PARAMETERS
-M=4; %nombre de symbole pour une modulation QPSK
-n=2; %nombre de bits par symbole QPSK
-init_phase= pi/4; %phase inital QPSK
 
-%
-M_IFFT = 10; %nombre de sous porteuses 
+% OFDM PARAMETERS Mode I
+
+M_IFFT = OFDM_Parameters.M_IFFT; %number of sub-carriers 
+
+%nbPilotes=OFDM_Parameters.nbPilotes; %nombre de paquets  pilotes
+%dataPilotes = OFDM_Parameters.nbitsPilotes ; %nombre total de bits des pilotes
+
+
+%Others variables
+%Choix =1;
+
+
 
 
 
 %%PROCEDURE
 
-%Suppresion prefixe cyclique
+
+% Remove prefix cyclic
+
 
 Suppr_CP = dataModulate(1:M_IFFT,:);
 
 %-----FFT-----
  FFT_function = fft(Suppr_CP ,M_IFFT); % discrete Fourier transform 
 
+%{ 
+ %pilots recovery
+ pilote_recup (:,1:nbPilotes) = FFT_function(:,1:nbPilotes );
+ 
+ %data recovery
+ data_recup(:,1:dataOfdm) = FFT_function (:, nbPilotes+1:end);
+
+
  
 %estimation et egalisation
+
+ % Estimation de canal
+  EQUALIZATION_Type = 'Zero-Forcing'; %choix de la technique d'égalisation 
+  
+  %Egalisation de canal
+  
+  if (Choix == 1)
+      if strcmp (EQUALIZATION_Type,'Zero-Forcing')==1 %methode du zero forcing
+          pilote_OFDM = modPilote();
+        channel = sum( ((pilote_recup)./( pilote_OFDM)),2)/nbPilotes ;
+         channel_inv= 1./channel;
+          
+          %egalisation des symboles recus
+         u= 1: dataOfdm; 
+          sym_recu(:,u) = diag(channel_inv)*data_recup(:,u);
+      end    
+          
+  else
+     sym_recu = data_recup; %pas d'egalisation
+  end
+
+  
 %--------------------------------------------
-
-fftOut=FFT_function(:); %conversion P/S
-
-
-%demodulation QPSK
-demodData = pskdemod(fftOut,M,init_phase); 
-
-%convert data decimal to binary
-demodData = de2bi(demodData,'left-msb'); 
-
-dataDemodulate = demodData(:)';
+%}
+ dataDemod_OFDM  = FFT_function;
+ 
 end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% DEMODULATION
+
+
+
+
+
+
+
 

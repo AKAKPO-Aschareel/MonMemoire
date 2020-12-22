@@ -1,7 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Aschareel AKAKPO
 % Date: Novembre 2020
-% Description : DAB Implémentation                       
+% Description : DAB Implémentation    
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear ;
@@ -10,10 +11,15 @@ clc;
 
 %% Emission
 
-binary_length = 44;
+
+
+%188 bytes *8 bits* 35 paquets RS= 52640 bits
+binary_length = 52640;
+
+%binary_length = 44;
 numErrs = 0; %errors counter
 
-%Define binary sequence of message audio DAB+
+%Define binary sequence of message audio DAB+ represent FIC and MSC data
 DataIn = randi ([0,1],1,binary_length); 
 
 %Scrambling
@@ -23,33 +29,38 @@ DataScramble = dab_scramble (DataIn, binary_length);
 %-----Channel codding-------
 
 %RS encoder
-codedRS = Reed_Solomon_Encoder(DataScramble);
+%codedRS = Reed_Solomon_Encoder(DataScramble);
+codedRS= RS_essai_DAB(DataScramble);
  
 
 %Convolutionnal coding
-codedData = convolutionalDAB(codedRS);
+coded_convolutional = convolutionalDAB(codedRS);
 
 
 
 % Time interleaving
-intrlvd = time_interleaving(codedData);
+intrlvd = time_interleaving(coded_convolutional);
 
 
 
 %Modulation
+%define OFDM and QPSK parameters
+para= OFDM_Parameters();
 
-dataModulate = Modulation(intrlvd);
+dataQpsk = QPSKMOD(para, intrlvd );
+dataOFDM_modulate = Modulation(para,dataQpsk);
 
 
 %% Reception
 
 %Demodulation
-dataDemodulate = Demodulation(dataModulate);
+dataOFDM_demodulate = Demodulation(para,dataOFDM_modulate);
+data_demodQPSK= QPSK_DEMOD(para,dataOFDM_demodulate );
 
 
 %Time desinterleaving
 
-desintrlvd = des_interleaving(dataDemodulate);
+desintrlvd = des_interleaving(data_demodQPSK);
 
 %----Channel decoding------
 
@@ -59,7 +70,8 @@ desintrlvd = des_interleaving(dataDemodulate);
 decodedData_inner  = viterbi(desintrlvd);
 
 % RS Decoding
-decoded_RS= Reed_Solomon_Decoder (decodedData_inner);
+%decoded_RS= Reed_Solomon_Decoder (decodedData_inner);
+decoded_RS= RS_decoder_DAB(decodedData_inner);
 
 % Desscrambling
 
