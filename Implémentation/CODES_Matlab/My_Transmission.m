@@ -48,13 +48,24 @@ intrlvd = time_interleaving(coded_convolutional);
 para= OFDM_Parameters();
 
 dataQpsk = QPSKMOD(para, intrlvd );
+%sym_interleaved= entrelacement_symboles (para,dataQpsk);
 dataOFDM_modulate = Modulation(para,dataQpsk);
+
+%%
+
+
+%rxSig = add_awgn_noise(dataOFDM_modulate,20);
 
 
 %% Reception
 
-%Demodulation
-dataOFDM_demodulate = Demodulation(para,dataOFDM_modulate);
+%OFDM Demodulation
+dataOFDM_demodulate = Demodulation(para,rxSig);
+
+%symbol desinterleaving
+%sym_desinterleaved =desentrelacement_symboles (para,dataOFDM_demodulate);
+
+%QPSK DEMODULATION
 data_demodQPSK= QPSK_DEMOD(para,dataOFDM_demodulate );
 
 

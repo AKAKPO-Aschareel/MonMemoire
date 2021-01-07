@@ -1,8 +1,10 @@
-function [dataout, n,No] = add_awgn_noise(data,SNRdB,l)
+function [dataout, n] = add_awgn_noise(data,SNRdB,l)
 
 %function to adds awgn noise to signal 
 %n= noise vector
 L=1; %oversampling ratio
+
+Snr= 10^(SNRdB/10); %Snr to linear scale
 
 TYPE= 'AWGN'; %channel type
 
@@ -17,7 +19,7 @@ switch TYPE
 P= L*sum(sum(abs(data).^2))/length(data);
 
 % noise  spectral density
-Snr= 10^(SNRdB/10); %Snr to linear scale
+
 No= P/Snr;
 
 %computer noise 
