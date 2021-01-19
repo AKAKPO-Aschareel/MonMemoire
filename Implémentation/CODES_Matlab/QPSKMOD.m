@@ -1,22 +1,22 @@
-function modDataQpsk = QPSKMOD(OFDM_Parameters,data)
+function modDataQpsk = QPSKMOD(data)
 
 %Initialisation des variables
 %----------------------------------------------------------------------------------
 
 %QPSK PARAMETERS
 
-M=OFDM_Parameters.M; % number of symbole for modulation QPSK
-n=OFDM_Parameters.n; % number of  bits per symbole QPSK
-init_phase= OFDM_Parameters.init_phase; % phase inital QPSK
+M=4; % number of symbol for modulation QPSK
+n=2; % number of  bits per symbole QPSK
+init_phase= pi/4; % phase inital QPSK
 
 
 
 % OFDM PARAMETERS Mode I
 
-M_IFFT = OFDM_Parameters.M_IFFT ; %number of sub-carriers 
-dataOfdm = OFDM_Parameters.dataOfdm; % nombres de paquets OFDM
+M_IFFT = 1536 ; %number of sub-carriers 
+dataOfdm = 75; % nombres de paquets OFDM
 
-nbits=OFDM_Parameters.nbits; %nombre de bits total à envoyer
+nbits=M_IFFT * dataOfdm * n; %nombre de bits total à envoyer
 
 
  
@@ -42,7 +42,7 @@ msgbits_matrix= reshape(msgbits,M_IFFT*dataOfdm,n);
  end
  
 %converion binaire en decimal/ Formation des symboles
- data_n= bi2de (msgbits_matrix,'left-msb'); 
+ data_n = bi2de (msgbits_matrix,'left-msb'); 
  
  %%%%%modulation QPSK 
  modDataQpsk= pskmod(data_n,M,init_phase); % modulation QPSK de l'information

@@ -70,7 +70,7 @@ codeRS_bi= de2bi(codeRS_de', 'left-msb');
 RS255_239= codeRS_bi;
 
 %Reed solomon (204,188) shortening
-RS204_188= RS255_239(zero_length+1:N*nb_paquets,:) ;
+RS204_188= RS255_239(zero_length+1:end,:) ;
 
 %convert matrix bits to vector bits
 coded_RS = reshape(RS204_188',1,N1*nb_paquets*m);

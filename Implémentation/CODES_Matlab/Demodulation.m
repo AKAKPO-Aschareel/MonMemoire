@@ -1,12 +1,12 @@
 
-function dataDemod_OFDM = Demodulation(OFDM_Parameters,dataModulate)
+function dataDemod_OFDM = Demodulation(dataModulate)
 
 %Initialize variables;
 
 
 % OFDM PARAMETERS Mode I
 
-M_IFFT = OFDM_Parameters.M_IFFT; %number of sub-carriers 
+M_IFFT = 1536; %number of sub-carriers 
 
 %nbPilotes=OFDM_Parameters.nbPilotes; %nombre de paquets  pilotes
 %dataPilotes = OFDM_Parameters.nbitsPilotes ; %nombre total de bits des pilotes

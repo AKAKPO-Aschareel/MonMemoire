@@ -1,16 +1,23 @@
 
-function dataModulate = Modulation(OFDM_Parameters,inputdata)
+function dataModulate = Modulation(inputdata)
 
 %Initialisation des variables
 %----------------------------------------------------------------------------------
 
 
 % OFDM PARAMETERS Mode I
-M_IFFT = OFDM_Parameters.M_IFFT ; %number of sub-carriers 
+M_IFFT = 1536; %number of sub-carriers 
 
-cp = OFDM_Parameters.cp;  % définition du préfixe cyclique
+%symbol length TsymOFDM = Tguard + Tu =  0.246 + 1.0 = 1.246ms
+%fraction de IG = 0.246/1.0
+%cp = 246/1000 * Para.M_IFFT = +377.8560;
+% sub carrier spacing : 1kHz
 
- 
+cp = 378;  % définition du préfixe cyclique
+
+ %nbPilotes = 25; %nombre de paquets  pilotes
+%nbitsPilotes = M_IFFT * nbPilotes * n ; %nombre total de bits des pilotes
+
 %---------------------------------------------------------------------------------------
  
 

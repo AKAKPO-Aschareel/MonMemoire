@@ -8,7 +8,7 @@ Para.init_phase = pi/4; % phase inital QPSK
 % OFDM PARAMETERS Mode I
 
 Para.M_IFFT = 1536; %number of sub-carriers 
-Para.dataOfdm=75; % OFDM symbols per transmission frame without null PR data  frame 
+Para.dataOfdm = 75; % OFDM symbols per transmission frame without null PR data  frame 
 Para.cp = 378;  % définition du préfixe cyclique
 Para.nbits = Para.M_IFFT * Para.dataOfdm*Para.n  ; %nombre de bits total à envoyer
 

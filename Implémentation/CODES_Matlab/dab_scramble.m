@@ -6,26 +6,26 @@ function DataOut = dab_scramble (DataIn, binary_length)
 %Initialize variables 
 
 N= binary_length; % Data lenght
-dataAux=DataIn;
+data=DataIn;
 
-dataAux = bi2de(dataAux(:),'left-msb'); % convert to bytes 
+data = bi2de(data(:),'left-msb'); % convert to bytes 
   
 %Get SCRAMBLING
 prbs_seq = dab_scramble_prbsseq( N );
 prbs_seq = bi2de(prbs_seq(:),'left-msb'); % convert to bytes
     
   
-    for i = 1:size(dataAux,2)
-        dataAux(:,i) = bitxor(dataAux(:,i), prbs_seq);
+    for i = 1:size(data,2)
+        data(:,i) = bitxor(data(:,i), prbs_seq);
     end
     
-     if ~isempty(dataAux)
-     dataAux = dataAux(:);
-     dataAuxBin = de2bi(dataAux,'left-msb')';
+     if ~isempty(data)
+     data = data(:);
+     dataBin = de2bi(data,'left-msb')';
     else
-     dataAuxBin = [];
+     dataBin = [];
     end
     
     
-    DataOut = dataAuxBin(:)';
+    DataOut = dataBin(:)';
 end

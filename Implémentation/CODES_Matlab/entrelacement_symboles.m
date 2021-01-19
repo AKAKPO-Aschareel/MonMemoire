@@ -1,19 +1,22 @@
-function symbol_interleaved = entrelacement_symboles(OFDM_Parameters,data)
 
-M_IFFT = OFDM_Parameters.M_IFFT ; %number of sub-carriers 
-dataOfdm = OFDM_Parameters.dataOfdm; % nombres de paquets OFDM
+function symbol_intrlvd = entrelacement_symboles(data)
 
- t=24 ; % depth of interleaving
+M_IFFT = 1536 ; %number of sub-carriers 
+dataOfdm = 75 ; %  symbol OFDM
 
- data = codedData; % output of convolutionnal encoder
- x= length(data); % data length
+ t=75 ; % depth of interleaving
+
+ 
+ 
+%Get symbol interleaving
+%-----------------------------------------------
+ data_redim= reshape (data,1,M_IFFT* dataOfdm);
+ x= length(data_redim); % data length
   n= x/t; % words length
   
- 
-%Get time interleaving
-%-----------------------------------------------
-intrlvd= reshape (data,n,t)';
-intrlvd=intrlvd(:)'; 
+sym_interleaved = matintrlv(data_redim,t,n);
+sym_interleaved_matrix= reshape (sym_interleaved,M_IFFT,dataOfdm);
 
+symbol_intrlvd= sym_interleaved_matrix;
 end
 
