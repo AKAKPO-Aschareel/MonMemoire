@@ -1,50 +1,63 @@
 
-function dataModulate = Modulation(inputdata)
-
-%Initialisation des variables
-%----------------------------------------------------------------------------------
+function  dataModulate = Modulation(inputdata)
 
 
 % OFDM PARAMETERS Mode I
-M_IFFT = 1536; %number of sub-carriers 
 
-%symbol length TsymOFDM = Tguard + Tu =  0.246 + 1.0 = 1.246ms
-%fraction de IG = 0.246/1.0
-%cp = 246/1000 * Para.M_IFFT = +377.8560;
+M_IFFT = 1536; %number of sub-carriers
+OFDM_symbol_block = 76; %total number symbol of OFDM 
+FFT_length = 2048;
+T = 1/2048000; %elementary period in secondes
+Tguard = 504* T; %Guard interval duration
+Tu = 2048*T; %symbol duration without Tguard
+
+IG_fraction = Tguard/Tu ; %fraction de IG
+cp = IG_fraction * FFT_length ;  % cyclic  préfix
+
+
+
+%cp = fraction de IG * FFT_length = 504;
 % sub carrier spacing : 1kHz
+%Max RF frequency 375 Mhz
 
-cp = 378;  % définition du préfixe cyclique
 
- %nbPilotes = 25; %nombre de paquets  pilotes
-%nbitsPilotes = M_IFFT * nbPilotes * n ; %nombre total de bits des pilotes
-
-%---------------------------------------------------------------------------------------
  
 
-modDataQpsk = inputdata;
-
-
-%{
-% Pilots symbols
- pilote_OFDM = modPilote();
-
-dataEnd= [pilote_OFDM modData]; %concatenation pilotes+data
-%}
-
- dataEnd= modDataQpsk; 
+DQPSK_data = inputdata;
  
+%Add phase reference symbol at the beginning to achieve the total number
+%symbol of OFDM 
+
+initial_phase_reference = phase_reference_symbol1()  ;
+initial_phase_reference_sym=initial_phase_reference';
  
+Data= [initial_phase_reference_sym DQPSK_data ];
+
+%Zero padding and Rearrangement data in the zero padding
+
+ m= FFT_length-M_IFFT  ; %add zero to each dqpsk symbols block (512 zeros)
+ 
+DataOFDM_after_zero_padding= [Data(769:1536,:) ; zeros(m,OFDM_symbol_block);Data(1:768,:)];
+
+
+
 %-----IFFT-----
- IFFT_function= ifft(dataEnd,M_IFFT); %Inverse discrete Fourier transform 
+ IFFT_function= ifft(DataOFDM_after_zero_padding,FFT_length); %Inverse discrete Fourier transform 
  
  %%%% Préfix cyclic
-    Ajout_CP = [ IFFT_function; IFFT_function(1:cp,:)];
+ 
+ Ajout_CP = [ IFFT_function; IFFT_function(1:cp,:)];
     
     dataModulate = Ajout_CP;
  
-end
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%
 
 

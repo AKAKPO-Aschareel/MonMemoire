@@ -61,16 +61,19 @@ dataEnd= [modPilote_redim modData_redim]; %concatenation pilotes+data
 %-------------------------------------------------------------------------------------------------------------  
 
 %Passage dans le canal par paquet%%%
-%for k = 1:dataOfdm+nbPilotes
- %rxSig = awgn(txsig ,20,'measured');
-%end
+
+Rx= [];
+   for k= 1:dataOfdm +nbPilotes
+    rxSig = awgn( txSig(:,k),3,'measured','dB');
+    Rx= [Rx rxSig];
+  end
 %--------------------------------------------------------------------------------
 
 % DEMODULATION
 
 %Suppresion prefixe cyclique
 
-Suppr_CP = txSig(1:M_IFFT,:);
+Suppr_CP = Rx(1:M_IFFT,:);
 
 %-----FFT-----
  FFT_function = fft(Suppr_CP ,M_IFFT); % discrete Fourier transform 

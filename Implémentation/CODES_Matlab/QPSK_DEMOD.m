@@ -18,11 +18,11 @@ nbits = M_IFFT * dataOfdm * n  ; %nombre de bits total à envoyer
 
 
 %%PROCEDURE
-
-
-
 sym_recu=data;
-figure(2);
+
+%plot constellation
+
+figure(3);
 hold on;
 plot(real(sym_recu ),imag(sym_recu),'*');
 title('Constellation recu')
@@ -30,7 +30,12 @@ title('Constellation recu')
 
 
 %demodulation QPSK
-demodData = pskdemod(sym_recu,M,init_phase); 
+demodData= [];
+ for l= 1:dataOfdm
+     demod = pskdemod(sym_recu(:,l),M,init_phase); 
+     
+     demodData = [demodData demod];
+ end 
 
 %convert data decimal to binary
 demodData = de2bi(demodData,'left-msb'); 

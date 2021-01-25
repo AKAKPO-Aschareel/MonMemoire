@@ -3,32 +3,34 @@ function modDataQpsk = QPSKMOD(data)
 %Initialisation des variables
 %----------------------------------------------------------------------------------
 
-%QPSK PARAMETERS
+%QPSK PARAMETERS for Mode I
 
 M=4; % number of symbol for modulation QPSK
 n=2; % number of  bits per symbole QPSK
 init_phase= pi/4; % phase inital QPSK
-
-
-
-% OFDM PARAMETERS Mode I
-
 M_IFFT = 1536 ; %number of sub-carriers 
-dataOfdm = 75; % nombres de paquets OFDM
+QPSK_symbol_block = 75; %  number of qpsk symbol block
 
-nbits=M_IFFT * dataOfdm * n; %nombre de bits total à envoyer
+%data size for mode I
+% total_bit=fic_bit + msc_bit 
+%
+%
+total_bit= 230400; 
+
+
 
 
  
 %---------------------------------------------------------------------------------------
- 
+ %%
+%%Block Partionner
 
  msgbits= data;
 s= length (msgbits);
- if s < nbits
+ if s < total_bit
      
    %%%%% GET PADDING%%%%%%
-  nb_zero= nbits-s; %define number of zero
+  nb_zero= total_bit-s; %define number of zero
      
     
 msgbits_redim= reshape(msgbits,[],n); %conversion S/P   
@@ -37,23 +39,30 @@ data_padding= [msgbits_redim;  zeros(nb_zero/2,n) ];
 msgbits_matrix=data_padding;
 
  else
-msgbits_matrix= reshape(msgbits,M_IFFT*dataOfdm,n);
+msgbits_matrix= reshape(msgbits,M_IFFT*QPSK_symbol_block,n);
 
  end
  
 %converion binaire en decimal/ Formation des symboles
  data_n = bi2de (msgbits_matrix,'left-msb'); 
+ data_block = reshape (data_n,M_IFFT, QPSK_symbol_block);
  
- %%%%%modulation QPSK 
- modDataQpsk= pskmod(data_n,M,init_phase); % modulation QPSK de l'information
- modDataQpsk= reshape(modDataQpsk,M_IFFT,dataOfdm);  %conversion S/P
+ %% QPSK Symbol Mapper
+ 
 
+ modDataQpsk= [];
+ 
+ for l= 1:QPSK_symbol_block
+     QPSK_sym= pskmod(data_block(:,l),M,init_phase); % modulation QPSK de l'information
+     modDataQpsk= [modDataQpsk QPSK_sym];
+ end  
+ 
  
 % Affichage constellation emise
 
 figure(1);
 hold on;
 plot(real(modDataQpsk),imag(modDataQpsk),'*');
-title('Constellation emise')
+title('Constellation QPSK emise')
 end
 

@@ -1,23 +1,29 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Aschareel AKAKPO
 % Date: Novembre 2020
-% Description : DAB Implémentation    
+% Description : DAB+ Implémentation  
+%Transmission mode : Mode I
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-clear ;
-close all;
+clear all;
 clc;
+close all;
+
 
 %% Emission
 
 
-
-%188 bytes *8 bits* 35 paquets RS= 52640 bits
+%DATA : 188 bytes *8 bits* 35 paquets RS= 52640 bits
 binary_length = 52640;
 
 
-TEB= [];
+TEB= [];%initialize BER 
+SNR_dB_start = 0; %SNR range
+SNR_dB_end = 20; %SNR range
+
+%%
+%simulation start
 
 %Define binary sequence of message audio DAB+ represent FIC and MSC data
 DataIn = randi ([0,1],1,binary_length); 
@@ -51,25 +57,29 @@ dataQpsk = QPSKMOD(intrlvd );
 %Symbols interleaved
 sym_interleaved= entrelacement_symboles (dataQpsk);
 
+%Differential modulation
+DQPSK_data = differential_modulator(sym_interleaved);
 
 %OFDM Modulation
-dataOFDM_modulate = Modulation(sym_interleaved);
 
+dataOFDM_modulate = Modulation(DQPSK_data);
 
+%{
 %%
 %Pass the signal through an AWGN channel 
 
-for snr= 0:0.05:10
+for Snr_dB= SNR_dB_start: SNR_dB_end
   Rx= [];
-   for k= 1:75
-    rxSig = awgn(dataOFDM_modulate(:,k),snr ,'measured','dB');
+   for k= 1:85  %dtatofdm+Pilot
+    rxSig = awgn(dataOFDM_modulate(:,k),Snr_dB,'measured','dB');
     Rx= [Rx rxSig];
   end
 
 %% Reception
 
 %OFDM Demodulation
-dataOFDM_demodulate = Demodulation(Rx );
+dataOFDM_demodulate = Demodulation(dataOFDM_modulate );
+
 
 %symbol desinterleaving
 sym_desinterleaved =desentrelacement_symbole (dataOFDM_demodulate);
@@ -107,21 +117,22 @@ DataOut = dab_desscramble(decoded_RS);
  TEBnew = nErrors/numBits;
  TEB= [TEB TEBnew];
 
- 
+
 end
 
+%%plot result
 
-snr=0:0.05:10;
 figure(3)
- semilogy (snr,TEB,'r-*','linewidth',2)
+SNR= SNR_dB_start:1: SNR_dB_end;
+semilogy (SNR,TEB,'r--*','MarkerSize',5,'MarkerFacecolor','r','linewidth',2);
 grid on;
 hold on;
-xlabel('SNR');
-ylabel('TEB');
- axis([0 20 1e-4 1e0]);
-    
+xlabel('SNR(dB)');
+ylabel('BER');
+legend('QPSK');
+axis([0 20 1e-4 1e0]);
 title('TEB en fonction de SNR');
 
 
+%}
 
-%%END
