@@ -6,12 +6,12 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-clear all;
+clear ;
 clc;
 close all;
 
 
-%% Emission
+%% At the transmitter part 
 
 
 %DATA : 188 bytes *8 bits* 35 paquets RS= 52640 bits
@@ -19,8 +19,8 @@ binary_length = 52640;
 
 
 TEB= [];%initialize BER 
-SNR_dB_start = 0; %SNR range
-SNR_dB_end = 20; %SNR range
+SNR_dB_start = -5; %SNR range
+SNR_dB_end = 10; %SNR range
 
 %%
 %simulation start
@@ -61,28 +61,34 @@ sym_interleaved= entrelacement_symboles (dataQpsk);
 DQPSK_data = differential_modulator(sym_interleaved);
 
 %OFDM Modulation
+ pilote_OFDM = modPilote();
+dataOFDM_modulate = Modulation(DQPSK_data, pilote_OFDM);
 
-dataOFDM_modulate = Modulation(DQPSK_data);
-
-%{
+ 
 %%
 %Pass the signal through an AWGN channel 
 
-for Snr_dB= SNR_dB_start: SNR_dB_end
+for Snr_dB= SNR_dB_start:0.5: SNR_dB_end
   Rx= [];
-   for k= 1:85  %dtatofdm+Pilot
+   for k= 1:78  %dtatofdm+Pilot
     rxSig = awgn(dataOFDM_modulate(:,k),Snr_dB,'measured','dB');
     Rx= [Rx rxSig];
   end
 
-%% Reception
+%%
+
+ %At the receiver part 
 
 %OFDM Demodulation
-dataOFDM_demodulate = Demodulation(dataOFDM_modulate );
+dataOFDM_demodulate = Demodulation(Rx,pilote_OFDM );
+
+%Differential demodulation
+DQPSK_demod = differential_demodulator(dataOFDM_demodulate);
+
 
 
 %symbol desinterleaving
-sym_desinterleaved =desentrelacement_symbole (dataOFDM_demodulate);
+sym_desinterleaved =desentrelacement_symbole (DQPSK_demod);
 
 %QPSK DEMODULATION
 data_demodQPSK= QPSK_DEMOD(sym_desinterleaved );
@@ -122,17 +128,17 @@ end
 
 %%plot result
 
-figure(3)
-SNR= SNR_dB_start:1: SNR_dB_end;
-semilogy (SNR,TEB,'r--*','MarkerSize',5,'MarkerFacecolor','r','linewidth',2);
+figure(5)
+SNR= SNR_dB_start:0.5: SNR_dB_end;
+semilogy (SNR,TEB,'b-o','MarkerSize',5,'MarkerFacecolor','r','linewidth',2);
 grid on;
 hold on;
 xlabel('SNR(dB)');
 ylabel('BER');
-legend('QPSK');
-axis([0 20 1e-4 1e0]);
+legend('pi/4 DQPSK');
+axis([-5 10 1e-4 1e0]);
 title('TEB en fonction de SNR');
 
 
-%}
+
 

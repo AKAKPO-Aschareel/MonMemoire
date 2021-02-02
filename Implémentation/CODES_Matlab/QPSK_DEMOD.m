@@ -9,9 +9,9 @@ M =4 ; % number of symbole for modulation QPSK
 init_phase = pi/4; % phase inital QPSK
 
  %OFDM PARAMETERS
-M_IFFT = 1536 ; %number of sub-carriers 
+K = 1536 ; %number of sub-carriers 
 dataOfdm = 75; % nombres de paquets OFDM
-nbits = M_IFFT * dataOfdm * n  ; %nombre de bits total à envoyer
+nbits = K * dataOfdm * n  ; %nombre de bits total à envoyer
 
 
 
@@ -22,7 +22,7 @@ sym_recu=data;
 
 %plot constellation
 
-figure(3);
+figure(4);
 hold on;
 plot(real(sym_recu ),imag(sym_recu),'*');
 title('Constellation recu')

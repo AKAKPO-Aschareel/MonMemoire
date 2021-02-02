@@ -1,11 +1,11 @@
 
-function  dataModulate = Modulation(inputdata)
+function  dataModulate = Modulation(inputdata, pilote_OFDM)
 
 
 % OFDM PARAMETERS Mode I
 
-M_IFFT = 1536; %number of sub-carriers
-OFDM_symbol_block = 76; %total number symbol of OFDM 
+K = 1536; %number of sub-carriers
+OFDM_symbol_block = 78; %total number symbol of OFDM 
 FFT_length = 2048;
 T = 1/2048000; %elementary period in secondes
 Tguard = 504* T; %Guard interval duration
@@ -22,29 +22,27 @@ cp = IG_fraction * FFT_length ;  % cyclic  préfix
 
 
  
+%Get DQPSK symbols 
+DataOFDM = inputdata;
 
-DQPSK_data = inputdata;
- 
-%Add phase reference symbol at the beginning to achieve the total number
-%symbol of OFDM 
+%Get pilots symbols 
+ pilote_data = pilote_OFDM;
 
-initial_phase_reference = phase_reference_symbol1()  ;
-initial_phase_reference_sym=initial_phase_reference';
- 
-Data= [initial_phase_reference_sym DQPSK_data ];
+%Insert pilots symbols
+DataEnd = [pilote_data DataOFDM];
 
 %Zero padding and Rearrangement data in the zero padding
 
- m= FFT_length-M_IFFT  ; %add zero to each dqpsk symbols block (512 zeros)
+ m= FFT_length-K  ; % size of zeros to each dataEnd  block (512 zeros)
  
-DataOFDM_after_zero_padding= [Data(769:1536,:) ; zeros(m,OFDM_symbol_block);Data(1:768,:)];
+DataOFDM_after_zero_padding= [DataEnd(769:1536,:) ; zeros(m,OFDM_symbol_block);DataEnd(1:768,:)];
 
 
 
-%-----IFFT-----
+%-----IFFT Block-----
  IFFT_function= ifft(DataOFDM_after_zero_padding,FFT_length); %Inverse discrete Fourier transform 
  
- %%%% Préfix cyclic
+ %-----Cyclic Prefix-----
  
  Ajout_CP = [ IFFT_function; IFFT_function(1:cp,:)];
     

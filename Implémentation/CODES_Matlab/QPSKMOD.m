@@ -8,7 +8,7 @@ function modDataQpsk = QPSKMOD(data)
 M=4; % number of symbol for modulation QPSK
 n=2; % number of  bits per symbole QPSK
 init_phase= pi/4; % phase inital QPSK
-M_IFFT = 1536 ; %number of sub-carriers 
+K = 1536 ; %number of sub-carriers 
 QPSK_symbol_block = 75; %  number of qpsk symbol block
 
 %data size for mode I
@@ -39,13 +39,13 @@ data_padding= [msgbits_redim;  zeros(nb_zero/2,n) ];
 msgbits_matrix=data_padding;
 
  else
-msgbits_matrix= reshape(msgbits,M_IFFT*QPSK_symbol_block,n);
+msgbits_matrix= reshape(msgbits,K*QPSK_symbol_block,n);
 
  end
  
 %converion binaire en decimal/ Formation des symboles
  data_n = bi2de (msgbits_matrix,'left-msb'); 
- data_block = reshape (data_n,M_IFFT, QPSK_symbol_block);
+ data_block = reshape (data_n,K, QPSK_symbol_block);
  
  %% QPSK Symbol Mapper
  
