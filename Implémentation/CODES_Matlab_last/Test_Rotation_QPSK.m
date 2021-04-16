@@ -14,14 +14,14 @@ close all;
 %%Parameters
 %%
 %QPSK PARAMETERS
-qpskModulator = comm.QPSKModulator;
+qpskmod = comm.QPSKModulator;
 M=4; %Ordre de modulation
 n=2; %bit number
 Rotation_angle_degrees=29.0; %angle de rotation
 
 %%
 %OFDM PARAMETERS
-OFDM_symbol_block=76; %nombre de symboles OFDM
+OFDM_symbol_block=152; %nombre de symboles OFDM
 K=1536; %nombre de sous porteuse de données
 FFT_length = 2048; % Taille de ifft
 T = 1/2048000; %elementary period in secondes
@@ -34,14 +34,14 @@ Tnull=2656; %Null_Symbol_Duration
 %cp = fraction de IG * FFT_length = 504;
 % sub carrier spacing : 1kHz
 
-n_estim=10; %nombre de symboles pilotes
+n_estim=50; %nombre de symboles pilotes
 
 %%
  
         
 %Rayleigh Parameters
-sampleRate = 2.048e6;    % Sample rate of 2.048  MHz
-maxDopplerShift  = 4;      % Maximum Doppler shift of diffuse components (Hz) 25km/h, first channel 
+sampleRate =2.048e6;    % Sample rate of 2.048  MHz
+maxDopplerShift  =0 ;      % Maximum Doppler shift of diffuse components (Hz) 25km/h, first channel 
 delayVector1 = [0.0 0.2 0.5 1.6 2.3 5.0]; % Discrete delays of six-path channel (s)
 delayVector = delayVector1.*10^-6; % Discrete delays of four-path channel (s)
 gainVector  = [-3 0 -2 -6 -8 -10];  % Average path gains (dB)
@@ -63,12 +63,12 @@ rayChan = comm.RayleighChannel( ...
 
 
 %DATA : 188 bytes *8 bits* 35 paquets RS= 52640 bits
-binary_length = 52640;
+binary_length = 2*52640;
 
 
 TEB= [];%initialize BER 
 SNR_dB_start = 0; %SNR range
-SNR_dB_end = 12; %SNR range
+SNR_dB_end = 49; %SNR range
 
 %%
 %simulation start
@@ -110,7 +110,8 @@ data_padding_redim =reshape(data_padding,length (data_padding)/2,n);
 data_dec = bi2de (data_padding_redim ,'left-msb'); 
 
 %%QPSK Symbol Mapper
- modSig =qpskModulator(data_dec );
+ modSig =qpskmod(data_dec );
+ 
  modSig= modSig.';
  
 % plot constellation QPSK classique
@@ -150,7 +151,9 @@ title('Constellation décalée')
 %%
 
 %Symbols interleaved
-sym_interleaved= entrelacement_symboles (modSig_decalee);
+p=96 ; % depth of interleaving
+ n= length(modSig)/p; % words length
+ sym_interleaved = matintrlv(modSig_decalee,p,n);
 
 %%
 %OFDM Modulation 
@@ -181,7 +184,7 @@ Tx_Frame_Final=[null_symb data_after_OFDM_redim]; %Final frame structure generat
 
 ray_Out=rayChan(Tx_Frame_Final.');
 
-for Snr_dB= SNR_dB_start:1: SNR_dB_end
+for Snr_dB= SNR_dB_start:2: SNR_dB_end
     signal_recu=awgn(ray_Out,Snr_dB,'measured','dB');
 
 
@@ -219,8 +222,8 @@ sig_esch=diag(channel_inva)*FFT_function ;
  
 %%
 %symbol desinterleaving
-sym_desinterleaved =desentrelacement_symbole (data_after_remove_zeros);
-
+redim= reshape(data_after_remove_zeros,1,OFDM_symbol_block*K);
+sym_desinterleaved =  matdeintrlv(redim,p,n);
 %%
 %Suppression du décalage cyclique
 y=length(sym_desinterleaved);
@@ -242,7 +245,7 @@ sym_non_decalee(y)=real(sym_desinterleaved(y))+1i*tt;
 
 %% Demappeur
 % Matrice de démappage
-Mat_Demap=[0 0 real(qpskModulator(0)*exp(1i*Rotation_angle_radians)) imag(qpskModulator(0)*exp(1i*Rotation_angle_radians));0 1 real(qpskModulator(1)*exp(1i*Rotation_angle_radians)) imag(qpskModulator(1)*exp(1i*Rotation_angle_radians));1 0 real(qpskModulator(2)*exp(1i*Rotation_angle_radians)) imag(qpskModulator(2)*exp(1i*Rotation_angle_radians));1 1 real(qpskModulator(3)*exp(1i*Rotation_angle_radians)) imag(qpskModulator(3)*exp(1i*Rotation_angle_radians))];
+Mat_Demap=[0 0 real(qpskmod(0)*exp(1i*Rotation_angle_radians)) imag(qpskmod(0)*exp(1i*Rotation_angle_radians));0 1 real(qpskmod(1)*exp(1i*Rotation_angle_radians)) imag(qpskmod(1)*exp(1i*Rotation_angle_radians));1 0 real(qpskmod(2)*exp(1i*Rotation_angle_radians)) imag(qpskmod(2)*exp(1i*Rotation_angle_radians));1 1 real(qpskmod(3)*exp(1i*Rotation_angle_radians)) imag(qpskmod(3)*exp(1i*Rotation_angle_radians))];
 
 j=1;
 
@@ -271,8 +274,7 @@ end
 data_demap=reshape(data_recu,1,size(data_recu,1)*size(data_recu,2));
 
 %Remove zero padding
-zero_size=4992;
-data_remove_padding= data_demap(:,1: (total_bit-zero_size));
+data_remove_padding= data_demap(:,1: s);
 %%
 %Time desinterleaving
 desintrlvd = des_interleaving(data_remove_padding);
@@ -298,24 +300,38 @@ DataOut = dab_desscramble(decoded_RS);
  numBits = binary_length;
     
     
-% Estimate the BER
+% Estimate the BERTEBnew = nErrors/numBits;
  TEBnew = nErrors/numBits;
  TEB= [TEB TEBnew];
 
+
+
+
+%  %EVM
+%         BER_M0 = zeros(K,1);
+%         for u=1:K
+%             EVM0(u)= sqrt((sum((abs((DataOFDM(u,:)) - ( data_after_remove_zeros(u,:)))).^2))./(sum(((abs((DataOFDM(u,:)))).^2))));
+%             
+%             BER_M0(u) =  (2/n)*qfunc((sqrt((2))*sin(pi/(M)))/EVM0(u));   % Used in first paper
+% 
+%         end
+%            % BER_MQ(j)= sum(BER_M0)./K;
+%            BER_MQ= sum(BER_M0)/K;
+%             TEB= [TEB BER_MQ];
 
 end
 
 %%plot result
 
 figure(4)
-SNR= SNR_dB_start:1: SNR_dB_end;
+SNR= SNR_dB_start:2: SNR_dB_end;
 semilogy (SNR,TEB,'r-o','MarkerSize',5,'MarkerFacecolor','r','linewidth',2);
 grid on;
 hold on;
 xlabel('SNR(dB)');
 ylabel('BER');
 legend('QPSK tournée Rayleigh');
-axis([0 15 1e-4 1e0]);
+axis([0 50 1e-4 1e0]);
 title('TEB en fonction de SNR');
 
 

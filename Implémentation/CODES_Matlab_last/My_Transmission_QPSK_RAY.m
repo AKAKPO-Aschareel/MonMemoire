@@ -14,9 +14,11 @@ close all;
 %%Parameters
 %%
 %QPSK PARAMETERS
+qpskmod = comm.QPSKModulator;
+qpskdemod = comm.QPSKDemodulator;
 
 M=4; %Ordre de modulation
-init_phase= pi/4; % phase initale QPSK
+%init_phase= pi/4; % phase initale QPSK
 n=2; %bit number
 
 %%
@@ -34,17 +36,17 @@ Tnull=2656; %Null_Symbol_Duration
 %cp = fraction de IG * FFT_length = 504;
 % sub carrier spacing : 1kHz
 
-n_estim=10; %nombre de symboles pilotes
+n_estim=20; %nombre de symboles pilotes
 
 %%
  
         
 %Rayleigh Parameters
-sampleRate = 2.048e6;    % Sample rate of 2.048  MHz
-maxDopplerShift  = 4;      % Maximum Doppler shift of diffuse components (Hz)
+sampleRate =2.048e6;    % Sample rate of 2.048  MHz
+maxDopplerShift  = 0;      % Maximum Doppler shift of diffuse components (Hz)
 delayVector1 = [0.0 0.2 0.5 1.6 2.3 5.0]; % Discrete delays of six-path channel (s)
 delayVector = delayVector1.*10^-6; % Discrete delays of four-path channel (s)
-gainVector  = [-3 0 -2 -6 -8 -10];  % Average path gains (dB)
+gainVector  = [ -3 0 -2  -6 -8 -10];  % Average path gains (dB)
 % delayVector = (0:5:15)*1e-6; % Discrete delays of four-path channel (s)
 % gainVector  = [0 -1 -2 -3];  % Average path gains (dB)
 
@@ -68,7 +70,7 @@ binary_length = 52640;
 
 TEB= [];%initialize BER 
 SNR_dB_start = 0; %SNR range
-SNR_dB_end = 12; %SNR range
+SNR_dB_end = 20; %SNR range
 
 %%
 %simulation start
@@ -91,7 +93,6 @@ codedRS= RS_essai_DAB(DataScramble);
 coded_convolutional = convolutionalDAB(codedRS);
 
 
-
 % Time interleaving
 intrlvd = time_interleaving(coded_convolutional);
 %%
@@ -110,7 +111,7 @@ data_padding_redim =reshape(data_padding,length (data_padding)/2,n);
 data_dec = bi2de (data_padding_redim ,'left-msb'); 
 
 %%QPSK Symbol Mapper
- modSig = pskmod(data_dec ,M,init_phase);
+ modSig = qpskmod(data_dec );
  modSig= modSig.';
  
 % plot constellation at transmitter
@@ -152,7 +153,7 @@ Tx_Frame_Final=[null_symb data_after_OFDM_redim]; %Final frame structure generat
 
 ray_Out=rayChan(Tx_Frame_Final.');
 
-for Snr_dB= SNR_dB_start:0.5: SNR_dB_end
+for Snr_dB= SNR_dB_start:1: SNR_dB_end
     signal_recu=awgn(ray_Out,Snr_dB,'measured','dB');
 
 
@@ -199,7 +200,7 @@ sym_desinterleaved =desentrelacement_symbole (data_after_remove_zeros);
 %%
 %%QPSK DEMODULATION
 sym_recu=sym_desinterleaved.';
-demodSig =pskdemod(sym_recu,M,init_phase);
+demodSig =qpskdemod(sym_recu);
 
 %converion  decimal en binaire
 data_bi = de2bi (demodSig,'left-msb');  
@@ -234,16 +235,25 @@ DataOut = dab_desscramble(decoded_RS);
     
     
 % Estimate the BER
- TEBnew = nErrors/numBits;
- TEB= [TEB TEBnew];
+%  TEBnew = nErrors/numBits;
+%  TEB= [TEB TEBnew];
+%EVM
+        BER_M0 = zeros(K,1);
+        for u=1:K
+            EVM0(u)= sqrt((sum((abs((DataOFDM(u,:)) - ( data_after_remove_zeros(u,:)))).^2))./(sum(((abs((DataOFDM(u,:)))).^2))));
+            
+            BER_M0(u) =  (2/n)*qfunc((sqrt((2))*sin(pi/(M)))/EVM0(u));   % Used in first paper
 
-
+        end
+           % BER_MQ(j)= sum(BER_M0)./K;
+           BER_MQ= sum(BER_M0)/K;
+            TEB= [TEB BER_MQ];
 end
 
 %%plot result
 
 figure(2)
-SNR= SNR_dB_start:0.5: SNR_dB_end;
+SNR= SNR_dB_start:1: SNR_dB_end;
 semilogy (SNR,TEB,'b-o','MarkerSize',5,'MarkerFacecolor','r','linewidth',2);
 grid on;
 hold on;
@@ -251,9 +261,9 @@ xlabel('SNR(dB)');
 ylabel('BER');
 
 legend('QPSK RAYLEIGH');
-axis([0 15 1e-4 1e0]);
+axis([0 20 1e-4 1e0]);
 title('TEB en fonction de SNR');
-
+% 
 
 
 

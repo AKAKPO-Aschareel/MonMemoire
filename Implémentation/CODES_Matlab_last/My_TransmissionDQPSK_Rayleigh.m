@@ -38,8 +38,8 @@ n_estim=10; %nombre de symboles pilotes
  
         
 %Rayleigh Parameters
-sampleRate = 2.048e6;    % Sample rate of 2.048  MHz
-maxDopplerShift  = 4;      % Maximum Doppler shift of diffuse components (Hz)
+sampleRate =2.048e6  ;    % Sample rate of 2.048  MHz
+maxDopplerShift  = 0;      % Maximum Doppler shift of diffuse components (Hz)
 delayVector1 = [0.0 0.2 0.5 1.6 2.3 5.0]; % Discrete delays of six-path channel (s)
 delayVector = delayVector1.*10^-6; % Discrete delays of four-path channel (s)
 gainVector  = [-3 0 -2 -6 -8 -10];  % Average path gains (dB)
@@ -152,7 +152,7 @@ Tx_Frame_Final=[null_symb data_after_OFDM_redim]; %Final frame structure generat
 
 ray_Out=rayChan(Tx_Frame_Final.');
 
-for Snr_dB= SNR_dB_start:0.5: SNR_dB_end
+for Snr_dB= SNR_dB_start:1: SNR_dB_end
     signal_recu=awgn(ray_Out,Snr_dB,'measured','dB');
 
 
@@ -243,7 +243,7 @@ end
 %%plot result
 
 figure(2)
-SNR= SNR_dB_start:0.5: SNR_dB_end;
+SNR= SNR_dB_start:1: SNR_dB_end;
 semilogy (SNR,TEB,'r-o','MarkerSize',5,'MarkerFacecolor','r','linewidth',2);
 grid on;
 hold on;
