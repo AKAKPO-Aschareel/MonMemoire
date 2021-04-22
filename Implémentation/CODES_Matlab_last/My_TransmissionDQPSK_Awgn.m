@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Author: Aschareel AKAKPO
-% Date: Novembre 2020
+% Date: Avril 2021
 % Description : DAB+ Implémentation  avec modulation DQPSK sur awgn
 %Transmission mode : Mode I
 %
@@ -21,7 +21,7 @@ n=2; %bit number
 
 %%
 %OFDM PARAMETERS
-OFDM_symbol_block=76; %nombre de symboles OFDM
+OFDM_symbol_block=152; %nombre de symboles OFDM
 K=1536; %nombre de sous porteuse de données
 FFT_length = 2048; % Taille de ifft
 T = 1/2048000; %elementary period in secondes
@@ -38,13 +38,13 @@ Tnull=2656; %Null_Symbol_Duration
 %% At the transmitter part 
 
 
-%DATA : 188 bytes *8 bits* 35 paquets RS= 52640 bits
-binary_length = 52640;
+%DATA : 188 bytes *8 bits* 70 paquets RS= 52640 bits
+binary_length = 2*52640;
 
 
 TEB= [];%initialize BER 
-SNR_dB_start = 0; %SNR range
-SNR_dB_end = 5; %SNR range
+SNR_dB_start = -5; %SNR range
+SNR_dB_end = 10; %SNR range
 
 %%
 %simulation start
@@ -100,12 +100,15 @@ title('Constellation DQPSK emise')
 
 %%
 %Symbols interleaved
-sym_interleaved= entrelacement_symboles (modSig);
+p=96 ; % depth of interleaving
+ w= length(modSig)/p; % words length
+ sym_interleaved = matintrlv(modSig,p,w);
+
 
 %%
 %OFDM Modulation 
 %Redim QPSK symbols after interleaving
-DataOFDM = reshape(sym_interleaved,76,1536);
+DataOFDM = reshape(sym_interleaved,OFDM_symbol_block,K);
 
 %Zero padding a la taille de ifft et reamenagement des sous porteuses
 m= FFT_length-K  ; % size of zeros to each dataEnd  block (512 zeros)
@@ -125,14 +128,14 @@ Tx_Frame_Final=[null_symb data_after_OFDM_redim]; %Final frame structure generat
 %%
 %add AWGN NOISE 
 
-for Snr_dB= SNR_dB_start:0.5: SNR_dB_end
+for Snr_dB= SNR_dB_start:1: SNR_dB_end
     rxSig=awgn(Tx_Frame_Final,Snr_dB,'measured','dB');
     
     
   
  %At the receiver part 
  
- data_receiver= rxSig(:,Tnull+1 :end);
+ data_receiver=  rxSig(:,Tnull+1 :end);
  Rx=reshape(data_receiver,OFDM_symbol_block,OFDM_length);
 
 %% 
@@ -149,7 +152,8 @@ FFT_function = fft(Suppr_CP ,FFT_length,2); % discrete Fourier transform
  
 %%
 %symbol desinterleaving
-sym_desinterleaved =desentrelacement_symbole (data_after_remove_zeros);
+redim= reshape(data_after_remove_zeros,1,OFDM_symbol_block*K);
+sym_desinterleaved =  matdeintrlv(redim,p,w);
 % figure(2);
 % hold on;
 % plot(real(sym_desinterleaved),imag(sym_desinterleaved),'*');
@@ -164,8 +168,8 @@ data_bi = de2bi (demodSig,'left-msb');
 data_bi_redim=reshape(data_bi, 1,length(data_bi)*2);
 
 %Remove zero padding
-zero_size=4992;
-data_remove_padding= data_bi_redim(:,1: (total_bit-zero_size));
+
+data_remove_padding= data_bi_redim(:,1: s);
 %%
 %Time desinterleaving
 desintrlvd = des_interleaving(data_remove_padding);
@@ -201,17 +205,17 @@ end
 %%plot result
 
 figure(2)
-SNR= SNR_dB_start:0.5: SNR_dB_end;
-semilogy (SNR,TEB,'b-o','MarkerSize',5,'MarkerFacecolor','r','linewidth',2);
+SNR= SNR_dB_start:1: SNR_dB_end;
+semilogy (SNR,TEB,'r-o','linewidth',2);
 grid on;
 hold on;
 xlabel('SNR(dB)');
 ylabel('BER');
 legend('DQPSK AWGN');
-axis([0 10 1e-4 1e0]);
+axis([-5 10 1e-4 1e0]);
 title('TEB en fonction de SNR');
 
 
 
 
-
+% 

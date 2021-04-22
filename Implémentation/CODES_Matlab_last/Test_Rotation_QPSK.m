@@ -40,8 +40,8 @@ n_estim=50; %nombre de symboles pilotes
  
         
 %Rayleigh Parameters
-sampleRate =2.048e6;    % Sample rate of 2.048  MHz
-maxDopplerShift  =0 ;      % Maximum Doppler shift of diffuse components (Hz) 25km/h, first channel 
+sampleRate =30.048e6;    % Sample rate of 2.048  MHz
+maxDopplerShift  =5 ;      % Maximum Doppler shift of diffuse components (Hz) 25km/h, first channel 
 delayVector1 = [0.0 0.2 0.5 1.6 2.3 5.0]; % Discrete delays of six-path channel (s)
 delayVector = delayVector1.*10^-6; % Discrete delays of four-path channel (s)
 gainVector  = [-3 0 -2 -6 -8 -10];  % Average path gains (dB)
@@ -68,8 +68,8 @@ binary_length = 2*52640;
 
 TEB= [];%initialize BER 
 SNR_dB_start = 0; %SNR range
-SNR_dB_end = 49; %SNR range
-
+SNR_dB_end = 20; %SNR range
+pas=2;
 %%
 %simulation start
 
@@ -184,7 +184,7 @@ Tx_Frame_Final=[null_symb data_after_OFDM_redim]; %Final frame structure generat
 
 ray_Out=rayChan(Tx_Frame_Final.');
 
-for Snr_dB= SNR_dB_start:2: SNR_dB_end
+for Snr_dB= SNR_dB_start:pas: SNR_dB_end
     signal_recu=awgn(ray_Out,Snr_dB,'measured','dB');
 
 
@@ -324,14 +324,14 @@ end
 %%plot result
 
 figure(4)
-SNR= SNR_dB_start:2: SNR_dB_end;
+SNR= SNR_dB_start:pas: SNR_dB_end;
 semilogy (SNR,TEB,'r-o','MarkerSize',5,'MarkerFacecolor','r','linewidth',2);
 grid on;
 hold on;
 xlabel('SNR(dB)');
 ylabel('BER');
 legend('QPSK tournée Rayleigh');
-axis([0 50 1e-4 1e0]);
+axis([0 20 1e-4 1e0]);
 title('TEB en fonction de SNR');
 
 

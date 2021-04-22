@@ -43,7 +43,7 @@ n_estim=20; %nombre de symboles pilotes
         
 %Rayleigh Parameters
 sampleRate =2.048e6;    % Sample rate of 2.048  MHz
-maxDopplerShift  = 0;      % Maximum Doppler shift of diffuse components (Hz)
+maxDopplerShift  = 1;      % Maximum Doppler shift of diffuse components (Hz)
 delayVector1 = [0.0 0.2 0.5 1.6 2.3 5.0]; % Discrete delays of six-path channel (s)
 delayVector = delayVector1.*10^-6; % Discrete delays of four-path channel (s)
 gainVector  = [ -3 0 -2  -6 -8 -10];  % Average path gains (dB)
